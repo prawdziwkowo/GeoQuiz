@@ -1,30 +1,39 @@
 package pl.it_developers.geoquiz;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-
 public class QuizActivity extends AppCompatActivity {
     private static final String TAG = "QuizActivity";
     private static final String KEY_INDEX = "question_index";
     private static final String KEY_ANSWERS = "question_answers";
+    private static final String KEY_IS_CHEATER = "is_cheater";
+    private static final String KEY_COUNT_CHEATS = "count_cheats";
+
+    private static final int REQUEST_CODE_CHEAT = 0;
+
     private static final int CORRECT_ANSWER = 1;
     private static final int INCORRECT_ANSWER = 1;
     private static final int NO_ANSWER = 0;
+    private static final int MAX_CHEATS = 3;
 
+    private Button cheatButton;
     private Button trueButton;
     private Button falseButton;
     private ImageButton nextButton;
     private ImageButton prevButton;
     private TextView questionTextView;
+    private TextView cheatTextView;
+
+    private boolean isCheater;
 
     private Question[] questions = new Question[] {
         new Question(R.string.question_australia, true),
@@ -40,12 +49,16 @@ public class QuizActivity extends AppCompatActivity {
 
     private int currentIndex = 0;
 
+    private int countCheats = 0;
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         Log.d(TAG, "onSaveInstanceState");
         outState.putInt(KEY_INDEX, currentIndex);
         outState.putIntArray(KEY_ANSWERS, answers);
+        outState.putBoolean(KEY_IS_CHEATER, isCheater);
+        outState.putInt(KEY_COUNT_CHEATS, countCheats);
     }
 
     @Override
@@ -91,7 +104,11 @@ public class QuizActivity extends AppCompatActivity {
         if (savedInstanceState != null) {
             currentIndex = savedInstanceState.getInt(KEY_INDEX);
             answers = savedInstanceState.getIntArray(KEY_ANSWERS);
+            isCheater = savedInstanceState.getBoolean(KEY_IS_CHEATER);
+            countCheats = savedInstanceState.getInt(KEY_COUNT_CHEATS);
         }
+
+        cheatTextView = (TextView) findViewById(R.id.cheet_text_view);
 
         questionTextView = (TextView) findViewById(R.id.question_text_view);
         questionTextView.setOnClickListener(new View.OnClickListener() {
@@ -138,7 +155,50 @@ public class QuizActivity extends AppCompatActivity {
                 showQuestion();
             }
         });
+
+
+        cheatButton = (Button)findViewById(R.id.cheat_button);
+        cheatButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean answerIsTrue = questions[currentIndex].isAnswerTrue();
+                Intent intent = CheatActivity.newIntent(QuizActivity.this, answerIsTrue);
+                startActivityForResult(intent, REQUEST_CODE_CHEAT);
+            }
+        });
+
+        disableCheatButton();
         showQuestion();
+        showCheatText();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_OK) {
+            return;
+        }
+
+        if (requestCode == REQUEST_CODE_CHEAT) {
+            if (data == null) {
+                return;
+            }
+            isCheater = CheatActivity.wasAnswerShown(data);
+            if (isCheater) {
+                countCheats ++;
+                showCheatText();
+                disableCheatButton();
+            }
+        }
+    }
+
+    private void showCheatText() {
+        cheatTextView.setText(getResources().getString(R.string.count_cheets) + " " + countCheats);
+    }
+
+    private void disableCheatButton() {
+        if (countCheats >= MAX_CHEATS) {
+            cheatButton.setEnabled(false);
+        }
     }
 
     private void showQuestion() {
@@ -151,12 +211,20 @@ public class QuizActivity extends AppCompatActivity {
         boolean answerIsTrue = questions[currentIndex].isAnswerTrue();
         int messageResId = 0;
 
+        if (isCheater) {
+            messageResId = R.string.judgment_toast;
+        } else {
+            if (userPressedTrue == answerIsTrue) {
+                messageResId = R.string.correct_toast;
+            } else {
+                messageResId = R.string.incorrect_toast;
+            }
+        }
+
         if (userPressedTrue == answerIsTrue) {
             answers[currentIndex] = CORRECT_ANSWER;
-            messageResId = R.string.correct_toast;
         } else {
             answers[currentIndex] = INCORRECT_ANSWER;
-            messageResId = R.string.incorrect_toast;
         }
 
         setEnabledAnswerButtons(false);

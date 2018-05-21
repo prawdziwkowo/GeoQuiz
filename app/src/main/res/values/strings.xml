@@ -14,4 +14,10 @@
     <string name="incorrect_toast">Niepoprawna odpowiedź</string>
     <string name="all_answer_were_given_pre">Oddano Wszystkie odpowiedzi. Twój wynik to: </string>
     <string name="all_answer_were_given_post">% poprawnych odpowiedzi.</string>
+    <string name="warning_text">Czy na pewno chcesz podpowiedź?</string>
+    <string name="show_answer_button">Pokaż odpowiedź</string>
+    <string name="cheat_button">Podpowiedź</string>
+    <string name="judgment_toast">Nie ładnie jest oszukiwać!</string>
+    <string name="api_level">Api level </string>
+    <string name="count_cheets">Wykorzystano podpowiedzi: </string>
 </resources>

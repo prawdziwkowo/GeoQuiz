@@ -26,12 +26,25 @@
             android:layout_height="wrap_content"
             android:text="@string/false_button" />
     </LinearLayout>
+    <Button
+        android:id="@+id/cheat_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:text="@string/cheat_button"/>
+
+    <TextView
+        android:id="@+id/cheet_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="24dp" />
+
     <ImageButton
         android:id="@+id/prev_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@string/prev_button"
-        android:layout_gravity="bottom|left"
+        android:layout_gravity="bottom|start"
         android:src="@drawable/arrow_left"
         />
     <ImageButton
@@ -39,7 +52,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@string/next_button"
-        android:layout_gravity="bottom|right"
+        android:layout_gravity="bottom|end"
         android:src="@drawable/arrow_right"
         />
 </FrameLayout>
